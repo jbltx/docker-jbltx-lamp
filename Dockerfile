@@ -8,7 +8,6 @@ ENV PHP_MEMORY_LIMIT    512M
 ENV MAX_UPLOAD          64M
 ENV PHP_MAX_FILE_UPLOAD 200
 ENV PHP_MAX_POST        128M
-# You can change the Blowfish Secret used by phpMyAdmin
 ENV BLOWFISH_SECRET     \$2a\$07\$sDCBHPdBa99FHv6pdfz9BeemO2VXwpcOVhlGoaEUFh96eiIfxnu5q
 
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
@@ -64,7 +63,7 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/reposit
     cd /www/phpmyadmin && \
     composer update --no-dev && \
     composer clear-cache && \
-    rm -f RELEASE_$PHPMYADMIN_VERSION.tar.gz && \
+    rm -f /RELEASE_$PHPMYADMIN_VERSION.tar.gz && \
     cp /www/phpmyadmin/config.sample.inc.php /www/phpmyadmin/config.inc.php && \
     sed -i "s#$cfg\['blowfish_secret'\] = '';#$cfg['blowfish_secret'] = '${BLOWFISH_SECRET}';#" /www/phpmyadmin/config.inc.php && \
     cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && \
@@ -75,6 +74,7 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/reposit
     mysql_install_db --user=mysql --verbose=1 --basedir=/usr --datadir=/var/lib/mysql --rpm > /dev/null && \
     ln -s /usr/lib/libxml2.so.2 /usr/lib/libxml2.so && \
     sed -i 's#AllowOverride None#AllowOverride All#' /etc/apache2/httpd.conf && \
+    sed -i 's#\#LoadModule rewrite_module#LoadModule rewrite_module#' /etc/apache2/httpd.conf && \
     sed -i 's#ServerName www.example.com:80#\nServerName localhost:80#' /etc/apache2/httpd.conf && \
     sed -i 's#^DocumentRoot ".*#DocumentRoot "/www"#g' /etc/apache2/httpd.conf && \
     sed -i 's#/var/www/localhost/htdocs#/www#g' /etc/apache2/httpd.conf && \
